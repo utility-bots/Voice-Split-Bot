@@ -2,3 +2,4 @@
 config.py
 split.log
 audio_files
+ __pycache__/

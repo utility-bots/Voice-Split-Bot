@@ -17,7 +17,7 @@ client = TelegramClient(f'{dir_path}/audio_splitter.session', api_id, api_hash)
 log_file_path = dir_path + '/split.log'
 
 logging.basicConfig(
-    # filename=log_file_path,
+    filename=log_file_path,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO)
 
