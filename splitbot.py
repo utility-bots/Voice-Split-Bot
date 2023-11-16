@@ -36,7 +36,6 @@ async def handle_audio(event):
         return await client.send_message(user_id,
                                          'شارژ اکانت شما به اتمام رسیده است برای شارژ به @MyTelegramBotsSupport پیام بدید.')
 
-
     # Record user activity for antiflood system, you can change LIMIT and TIMEFRAME as your needs.
     current_time = time()
     LIMIT = 1
@@ -114,6 +113,7 @@ def check_premium_time(user_id):
 
     return False
 
+
 # Function to find a matching string from a list in a target string for finding file format
 def find_matching_string(target_string, string_list):
     target_string = target_string.lower()
@@ -121,6 +121,7 @@ def find_matching_string(target_string, string_list):
         if string.lower() in target_string:
             return string
     return None
+
 
 # Function to remove files starting with a certain name in a directory
 def remove_files_starting_with(directory, file_name):
