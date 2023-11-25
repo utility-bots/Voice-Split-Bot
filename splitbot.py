@@ -16,7 +16,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 user_activity = {}
 
 # Initialize a Telegram client, obtain your api_id and api_hash from https://my.telegram.org/
-client = TelegramClient(f'{dir_path}/support_account.session', api_id, api_hash)
+client = TelegramClient(f'{dir_path}/audio_splitter.session', api_id, api_hash)
 
 # Define the path for the log file
 log_file_path = dir_path + '/split.log'
@@ -88,7 +88,8 @@ async def handle_audio(event):
 
     except Exception as e:
         print(f"Error processing audio: {e}")
-        pass
+        await client.send_message(user_id, 'فرمت فایل مشکل دارد و توسط بات نمیتواند تبدیل شود.')
+        return
 
     segment_duration = 10 * 60
     offset = 0
