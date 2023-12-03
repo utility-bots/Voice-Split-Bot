@@ -91,7 +91,7 @@ async def handle_audio(event):
         await client.send_message(user_id, 'فرمت فایل مشکل دارد و توسط بات نمیتواند تبدیل شود.')
         return
 
-    segment_duration = 10 * 60
+    segment_duration = 15 * 60
     offset = 0
     segment_index = 0
     segment_paths = []
