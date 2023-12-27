@@ -88,8 +88,7 @@ async def handle_audio(event):
 
     except Exception as e:
         print(f"Error processing audio: {e}")
-        await client.send_message(user_id, 'فرمت فایل مشکل دارد و توسط بات نمیتواند تبدیل شود.')
-        return
+        pass
 
     segment_duration = 15 * 60
     offset = 0
