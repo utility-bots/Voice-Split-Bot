@@ -34,14 +34,28 @@ async def ffmpeg_convert(audio, final_audio):
     await ffmpeg.execute()
 
 
+async def reply_with_text(event, message_to_reply):
+    await event.reply(message_to_reply)
+
+
+@client.on(events.NewMessage(pattern='.*'))
+async def reply_to_message(event):
+    # Define the text you want to reply with
+    reply_text = "سلام اینجا فقط فایل های صوتی برای تقسیم رو بفرستید اگر هم نیاز به شارژ بات دارید برای شارژ به @MyTelegramBotsSupport پیام بدید."
+
+    # Reply to the received message with the defined text
+    await reply_with_text(event, reply_text)
+
+
 # Define a handler for handling incoming audio messages
 @client.on(events.NewMessage(func=lambda event: event.audio or event.voice or event.document))
 async def handle_audio(event):
     user_id = event.chat_id
     # Check if the user has premium time remaining, or you can skip this part and use it as free for all.
-    if not (check_premium_time(user_id)):
+    # if not (check_premium_time()):
+    if not (check_premium_time(user_id) or check_free_usage_left(user_id)):
         return await client.send_message(user_id,
-                                         'شارژ اکانت شما به اتمام رسیده است برای شارژ به @MyTelegramBotsSupport پیام بدید.')
+                                         'شارژ اکانت شما به اتمام رسیده است برای شارژ به @VoiceToTextSupport پیام بدید.')
 
     # Record user activity for antiflood system, you can change LIMIT and TIMEFRAME as your needs.
     current_time = time()
@@ -63,7 +77,7 @@ async def handle_audio(event):
     try:
         file_id = event.message.audio.id
         # file_name = event.message.audio.attributes[-1].file_name
-        file_name =str(file_id)
+        file_name = str(file_id)
     except AttributeError:
         try:
             file_id = event.message.voice.id
@@ -78,14 +92,12 @@ async def handle_audio(event):
     audio = await event.download_media(file=f'{dir_path}/audio_files/{user_id}/{file_name}', )
     final_audio = f'{dir_path}/audio_files/{user_id}/{file_name}.wav'
     #
-    format_types = ['mp3', 'ogg', 'm4a', 'aac', 'mav', 'flac', 'wma', 'amr', 'aiff', 'ape', 'oga','wav']
+    format_types = ['mp3', 'ogg', 'm4a', 'aac', 'mav', 'flac', 'wma', 'amr', 'aiff', 'ape', 'oga', 'wav']
 
     file_type = find_matching_string(file_name, format_types)
 
-
     try:
         await asyncio.wait_for(ffmpeg_convert(audio, final_audio), timeout=50)
-
     except Exception as e:
         print(f"Error processing audio: {e}")
         pass
@@ -115,6 +127,36 @@ async def handle_audio(event):
     os.makedirs(output_dir, exist_ok=True)
 
     remove_files_starting_with(f'{dir_path}/audio_files/{user_id}/', file_name)
+
+
+def check_free_usage_left(user_id):
+
+    try:
+        con = psycopg2.connect(host=PGHOST, user=PGUSER, password=PGPASSWORD, database=PGDATABASE)
+
+        cur = con.cursor()
+        cur.execute('select usage from customers WHERE user_id = %s;', (user_id))
+        usage = cur.fetchone()[0]
+
+        if usage > 0:
+            usage = usage - 1
+
+        else:
+            return False
+
+        insert_query = (f'''
+        UPDATE customers
+        SET usage = {usage}
+        WHERE user_id = {user_id};
+        ''')
+
+        cur.execute(insert_query)
+        con.commit()
+        con.close()
+        return True
+
+    except (Exception, psycopg2.Error) as error:
+        print("Failed to insert record into table", error)
 
 
 def check_premium_time(user_id):

@@ -7,7 +7,8 @@ config.py
 
 # C extensions
 *.so
-
+train
+download_train_data.py
 # Distribution / packaging
 .Python
 build/
