@@ -40,11 +40,12 @@ async def reply_with_text(event, message_to_reply):
 
 @client.on(events.NewMessage(pattern='.*'))
 async def reply_to_message(event):
-    # Define the text you want to reply with
-    reply_text = "سلام اینجا فقط فایل های صوتی برای تقسیم رو بفرستید اگر هم نیاز به شارژ بات دارید برای شارژ به @MyTelegramBotsSupport پیام بدید."
+    if not (event.audio or event.voice or event.document):
+        # Define the text you want to reply with
+        reply_text = "سلام اینجا فقط فایل های صوتی و تصویری برای تقسیم رو بفرستید. محدودیت فایل صوتی ۴ ساعت و محدودیت فایل تصویری حدود ۲ ساعت است. اگر هم نیاز به شارژ بات دارید برای شارژ به @VoiceToTextSupport پیام بدید."
 
-    # Reply to the received message with the defined text
-    await reply_with_text(event, reply_text)
+        # Reply to the received message with the defined text
+        await reply_with_text(event, reply_text)
 
 
 # Define a handler for handling incoming audio messages
@@ -130,12 +131,12 @@ async def handle_audio(event):
 
 
 def check_free_usage_left(user_id):
-
+    str_user_id = str(user_id)
     try:
         con = psycopg2.connect(host=PGHOST, user=PGUSER, password=PGPASSWORD, database=PGDATABASE)
 
         cur = con.cursor()
-        cur.execute('select usage from customers WHERE user_id = %s;', (user_id))
+        cur.execute('select usage from customers WHERE user_id = %s;', (str_user_id,))
         usage = cur.fetchone()[0]
 
         if usage > 0:
@@ -147,7 +148,7 @@ def check_free_usage_left(user_id):
         insert_query = (f'''
         UPDATE customers
         SET usage = {usage}
-        WHERE user_id = {user_id};
+        WHERE user_id = {str_user_id};
         ''')
 
         cur.execute(insert_query)
